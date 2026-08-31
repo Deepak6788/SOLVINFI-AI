@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SOLVINFI Dashboard</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 25px 40px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        header p {
+            margin-top: 8px;
+            color: #9ca3af;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            padding: 30px 40px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .card-title {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .incident {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .incident-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .service {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: #166534;
+            font-weight: bold;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .detail {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .label {
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-weight: bold;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 800px) {
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>SOLVINFI</h1>
+
+    <p>
+        Intelligent Incident Management Platform
+    </p>
+
+</header>
+
+
+<div class="container">
+
+
+    <!-- ================================================== -->
+    <!-- STATISTICS -->
+    <!-- ================================================== -->
+
+    <div class="stats">
+
+        <div class="card">
+
+            <div class="card-title">
+                Total Incidents
+            </div>
+
+            <div
+                class="card-value"
+                id="total"
+            >
+                -
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                High Priority
+            </div>
+
+            <div
+                class="card-value"
+                id="high"
+            >
+                -
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Escalated
+            </div>
+
+            <div
+                class="card-value"
+                id="escalated"
+            >
+                -
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Resolved
+            </div>
+
+            <div
+                class="card-value"
+                id="resolved"
+            >
+                -
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- INCIDENTS -->
+    <!-- ================================================== -->
+
+    <h2>Incident History</h2>
+
+
+    <div id="incidents">
+
+        Loading incidents...
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+    // ======================================================
+    // SOLVINFI API
+    // ======================================================
+
+    const API_URL =
+        "http://127.0.0.1:9000/incidents/history";
+
+
+    // ======================================================
+    // LOAD INCIDENTS
+    // ======================================================
+
+    async function loadIncidents() {
+
+        const container =
+            document.getElementById(
+                "incidents"
+            );
+
+
+        try {
+
+            console.log(
+                "Connecting to:",
+                API_URL
+            );
+
+
+            const response =
+                await fetch(
+                    API_URL
+                );
+
+
+            console.log(
+                "HTTP status:",
+                response.status
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "API returned HTTP " +
+                    response.status
+                );
+
+            }
+
+
+            const incidents =
+                await response.json();
+
+
+            console.log(
+                "Incidents received:",
+                incidents
+            );
+
+
+            // ==================================================
+            // STATISTICS
+            // ==================================================
+
+            document.getElementById(
+                "total"
+            ).textContent =
+                incidents.length;
+
+
+            document.getElementById(
+                "high"
+            ).textContent =
+                incidents.filter(
+                    incident =>
+                        incident.priority === "HIGH"
+                ).length;
+
+
+            document.getElementById(
+                "escalated"
+            ).textContent =
+                incidents.filter(
+                    incident =>
+                        incident.escalation_required === true
+                ).length;
+
+
+            document.getElementById(
+                "resolved"
+            ).textContent =
+                incidents.filter(
+                    incident =>
+                        incident.final_status === "RESOLVED"
+                ).length;
+
+
+            // ==================================================
+            // NO INCIDENTS
+            // ==================================================
+
+            if (
+                incidents.length === 0
+            ) {
+
+                container.innerHTML =
+                    "<p>No incidents found.</p>";
+
+                return;
+
+            }
+
+
+            // ==================================================
+            // DISPLAY INCIDENTS
+            // ==================================================
+
+            container.innerHTML =
+                incidents.map(
+                    incident => `
+
+                        <div class="incident">
+
+                            <div class="incident-header">
+
+                                <div class="service">
+
+                                    ${incident.service}
+
+                                </div>
+
+                                <div class="status">
+
+                                    ${incident.final_status}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="details">
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Root Cause
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.root_cause}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Confidence
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.root_cause_confidence}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Priority
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.priority}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Correlation Score
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.correlation_score}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Severity
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.highest_severity}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Escalation
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.escalation_level}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Remediation
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.remediation_action}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Verification
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.verification_status}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Anomaly Before
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.before_anomaly_score}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="detail">
+
+                                    <div class="label">
+                                        Anomaly After
+                                    </div>
+
+                                    <div class="value">
+                                        ${incident.after_anomaly_score}
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                    `
+                ).join("");
+
+
+        } catch (error) {
+
+            console.error(
+                "SOLVINFI API ERROR:",
+                error
+            );
+
+
+            container.innerHTML = `
+
+                <div class="error">
+
+                    <strong>
+                        Unable to connect to SOLVINFI API
+                    </strong>
+
+                    <br><br>
+
+                    ${error.message}
+
+                    <br><br>
+
+                    API:
+                    ${API_URL}
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+
+    // ======================================================
+    // START
+    // ======================================================
+
+    loadIncidents();
+
+
+</script>
+
+
+</body>
+
+</html>
