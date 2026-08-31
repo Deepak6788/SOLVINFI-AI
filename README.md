@@ -342,6 +342,6 @@ SOLVINFI currently demonstrates an end-to-end incident intelligence workflow cov
 
 ---
 
-## Author
+## Developer
 
 **Deepak Ram**
